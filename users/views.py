@@ -1,26 +1,23 @@
-from django.shortcuts import render
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
-# Create your views here.
-class RegisterUser:
-    def __init__(self, request):
-        self.request = request
+class RegisterUser(APIView):
+    def get(self, request):
+        return Response({"message": "User registration page"}, status=status.HTTP_200_OK)
 
-    def post(self):
+    def post(self, request):
         # Logic for registering a user
-        pass
+        return Response({"message": "User registered"}, status=status.HTTP_201_CREATED)
 
-class LoginUser:
-    def __init__(self, request):
-        self.request = request
 
-    def post(self):
+class LoginUser(APIView):
+    def post(self, request):
         # Logic for logging in a user
-        pass
-    
-class AuthUser:
-    def __init__(self, request):
-        self.request = request
+        return Response({"message": "User logged in"}, status=status.HTTP_200_OK)
 
-    def get(self):
-        # Logic for authenticating a user
-        pass
+
+class AuthUser(APIView):
+    def get(self, request):
+        # Logic for checking authentication
+        return Response({"authenticated": True}, status=status.HTTP_200_OK)
