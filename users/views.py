@@ -1,6 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from .serializers import UserSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
 
 class RegisterUser(APIView):
     def get(self, request):
@@ -18,6 +21,16 @@ class LoginUser(APIView):
 
 
 class AuthUser(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        # Logic for checking authentication
-        return Response({"authenticated": True}, status=status.HTTP_200_OK)
+        user = request.user
+
+        serializer = UserSerializer(user)
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            "user": serializer.data,
+            "access": str(refresh.access_token),
+            "refresh": str(refresh)
+        }, status=status.HTTP_200_OK)
