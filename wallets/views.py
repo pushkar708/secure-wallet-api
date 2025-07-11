@@ -1,0 +1,113 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .models import Wallet, Transaction
+from .serializers import WalletBalanceSerializer, TopUpSerializer, TransactionSerializer
+from django.db import transaction as db_transaction
+from django.db.models import F
+from django_ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
+
+class WalletBalanceView(APIView):
+    permission_classes = [IsAuthenticated]
+    @method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True))
+    def get(self, request):
+        user = request.user
+        try:
+            wallet = Wallet.objects.get(user=user)
+        except Wallet.DoesNotExist:
+            return Response({"error": "Wallet not found"}, status=404)
+
+        serializer = WalletBalanceSerializer(wallet)
+        return Response(serializer.data, status=200)
+
+class TransactionDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        ref = request.query_params.get('reference')
+        if not ref:
+            return Response({"error": "Reference is required."}, status=400)
+
+        try:
+            transaction = Transaction.objects.get(reference=ref, wallet__user=request.user)
+        except Transaction.DoesNotExist:
+            return Response({"error": "Transaction not found."}, status=404)
+
+        serializer = TransactionSerializer(transaction)
+        return Response(serializer.data, status=200)
+    
+class TransactionAllDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        try:
+            wallet = Wallet.objects.get(user=user)
+        except Wallet.DoesNotExist:
+            return Response({"error": "Wallet not found"}, status=404)
+
+        transactions = wallet.transactions.all()
+        serializer = TransactionSerializer(transactions, many=True)
+        return Response(serializer.data, status=200)
+    
+class InitiateTopUpView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = TopUpSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        amount = serializer.validated_data['amount']
+        wallet = Wallet.objects.get(user=request.user)
+
+        txn = Transaction.objects.create(
+            wallet=wallet,
+            txn_type=Transaction.TOP_UP,
+            amount=amount,
+            status=Transaction.STATUS_PENDING,
+            note="User initiated top-up"
+        )
+
+        # Integrate with your payment gateway here and return payment URL or ID
+        return Response({
+            "message": "Top-up initiated",
+            "reference": txn.reference,
+            "amount": str(amount),
+            "status": txn.status,
+        }, status=201)
+
+class ConfirmTopUpView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        reference = request.data.get("reference")
+        payment_verified = request.data.get("verified")  # Replace with real verification!
+
+        if not reference or payment_verified != True:
+            return Response({"error": "Invalid confirmation"}, status=400)
+
+        with db_transaction.atomic():
+            try:
+                txn = Transaction.objects.select_for_update().get(reference=reference, wallet__user=request.user)
+            except Transaction.DoesNotExist:
+                return Response({"error": "Transaction not found"}, status=404)
+
+            if txn.status == Transaction.STATUS_COMPLETED:
+                return Response({"message": "Already completed"}, status=200)
+
+            # Simulated verification step (should be real in production)
+            txn.status = Transaction.STATUS_COMPLETED
+            txn.save()
+
+            wallet = txn.wallet
+            wallet.balance = F('balance') + txn.amount
+            wallet.save(update_fields=["balance"])
+            wallet.refresh_from_db()
+
+        return Response({
+            "message": "Top-up confirmed",
+            "reference": txn.reference,
+            "new_balance": str(wallet.balance)
+        }, status=200)
