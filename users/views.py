@@ -3,14 +3,18 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 from django.contrib.auth import get_user_model
+from django_ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
 
 User = get_user_model()
 
 
 class RegisterUser(APIView):
+    
+    @method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True))
     def get(self, request):
         return Response({"message": "User registration page"}, status=status.HTTP_200_OK)
 
@@ -21,8 +25,9 @@ class RegisterUser(APIView):
             return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 class LoginUser(APIView):
+    permission_classes = [AllowAny]
+    @method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True))
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -55,6 +60,7 @@ class LoginUser(APIView):
 class AuthUser(APIView):
     permission_classes = [IsAuthenticated]
 
+    @method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True))
     def get(self, request):
         user = request.user
 
