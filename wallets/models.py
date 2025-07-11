@@ -18,6 +18,7 @@ class Transaction(models.Model):
     STATUS_PENDING = 'PENDING'
     STATUS_COMPLETED = 'COMPLETED'
     STATUS_FAILED = 'FAILED'
+    STATUS_EXPIRED = 'EXPIRED'
 
     TYPES = [(TOP_UP, 'Top Up'), (WITHDRAW, 'Withdraw')]
     STATUS_CHOICES = [

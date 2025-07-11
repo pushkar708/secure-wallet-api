@@ -18,4 +18,4 @@ class TopUpSerializer(serializers.Serializer):
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
-        fields = ['reference', 'txn_type', 'amount', 'timestamp', 'note']
+        fields = ['reference', 'txn_type', 'amount', 'timestamp', 'note', 'status']
