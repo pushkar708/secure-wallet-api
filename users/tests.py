@@ -7,9 +7,9 @@ User = get_user_model()
 
 class UserAuthTests(APITestCase):
     def setUp(self):
-        self.register_url = reverse('register')   # Use actual URL name if defined
-        self.login_url = reverse('login')         # Use actual URL name if defined
-        self.auth_user_url = reverse('auth_me') # Use actual URL name if defined
+        self.register_url = reverse('register')
+        self.login_url = reverse('login')
+        self.auth_user_url = reverse('auth_me')
 
         self.user_data = {
             'username': 'testuser',

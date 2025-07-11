@@ -84,7 +84,7 @@ SIMPLE_JWT = {
 
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-    'ALGORITHM': 'HS256',  # For now. Move to RS256 (asymmetric) in prod.
+    'ALGORITHM': 'HS256',
 }
 
 WSGI_APPLICATION = 'secure_wallet_api.wsgi.application'

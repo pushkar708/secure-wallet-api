@@ -9,6 +9,10 @@ from django.db.models import F
 from django_ratelimit.decorators import ratelimit
 from django.utils.decorators import method_decorator
 
+"""
+API endpoint to retrieve the authenticated user's wallet balance.
+This endpoint returns the user's wallet balance and currency.
+"""
 class WalletBalanceView(APIView):
     permission_classes = [IsAuthenticated]
     @method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True))
@@ -22,6 +26,10 @@ class WalletBalanceView(APIView):
         serializer = WalletBalanceSerializer(wallet)
         return Response(serializer.data, status=200)
 
+"""
+API endpoint to retrieve a specific transaction by reference.
+This endpoint returns the details of a transaction for the authenticated user.
+"""
 class TransactionDetailView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
@@ -35,7 +43,11 @@ class TransactionDetailView(APIView):
 
         serializer = TransactionSerializer(transaction)
         return Response(serializer.data, status=200)
-    
+
+"""
+API endpoint to retrieve all transactions for the authenticated user.
+This endpoint returns a list of all transactions associated with the user's wallet.
+"""
 class TransactionAllDetailView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
@@ -72,6 +84,11 @@ class InitiateTopUpView(APIView):
             "status": txn.status,
         }, status=201)
 
+"""
+API endpoint to confirm a top-up transaction.
+This endpoint simulates payment verification and updates the transaction status.
+It should be replaced with real payment gateway verification in production.
+"""
 class ConfirmTopUpView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):

@@ -12,9 +12,11 @@ from django.utils.decorators import method_decorator
 User = get_user_model()
 
 
+"""
+API endpoint for registering a new user.
+This endpoint creates a new user and initializes their wallet.
+"""
 class RegisterUser(APIView):
-    
-
     @method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True))
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -23,6 +25,10 @@ class RegisterUser(APIView):
             return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+"""
+API endpoint for logging in a user.
+This endpoint authenticates the user and returns JWT tokens.
+"""
 class LoginUser(APIView):
     permission_classes = [AllowAny]
     @method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True))
@@ -51,6 +57,10 @@ class LoginUser(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+"""
+API endpoint to retrieve authenticated user's information.
+This endpoint returns the user's details along with JWT tokens.
+"""
 class AuthUser(APIView):
     permission_classes = [IsAuthenticated]
 
