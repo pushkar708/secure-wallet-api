@@ -1,9 +1,10 @@
-# 🔐 Secure Wallet API
+#  Secure Wallet API
 
-A secure Django REST API for user registration, JWT-based authentication, and wallet management including top-up and transaction tracking.
+A Django REST API for secure user registration, JWT-based authentication, and wallet management including top-up and maintaining transaction history.
 
+---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Clone the Project
 
@@ -51,34 +52,35 @@ python manage.py runserver
 
 ---
 
-## 🔑 Authentication Flow (JWT)
+##  Authentication Flow (JWT)
 
 | Endpoint                  | Method | Description                          |
 |---------------------------|--------|--------------------------------------|
-| `/api/v1/register/`       | POST   | Register a new user                  |
+| `/api/v1/register/`       | POST   | Register a new user, the user wallet is created along wiith the user                  |
 | `/api/v1/login/`          | POST   | Login and get access + refresh token |
 | `/api/v1/.auth/me/`       | GET    | Get authenticated user details       |
-| `/api/v1/token/refresh/`  | POST   | Refresh access token                 |
+| `/api/v1/token/refresh/`  | POST   | Refresh access token, here the old token is expired and blacklisted, so that in case of any leaks, the token is safe                 |
 
-> 💡 Send access token in the header for protected routes:  
+>  Send access token in the header for protected routes:  
 > `Authorization: Bearer <access_token>`
 
 ---
 
-## 💰 Wallet Management
+##  Wallet Management
 
-| Endpoint                                     | Method | Description                              |
-|----------------------------------------------|--------|------------------------------------------|
-| `/api/v1/wallet/`                            | GET    | View wallet balance                      |
-| `/api/v1/wallet/top-up/`                     | POST   | Request to top-up balance                |
-| `/api/v1/wallet/top-up/confirm/`             | POST   | Confirm top-up payment before update     |
-| `/api/v1/wallet/transaction/<reference>/`    | GET    | Get transaction details by reference     |
+| Endpoint                                        | Method | Description                              |
+|-------------------------------------------------|--------|------------------------------------------|
+| `/api/v1/wallet/balance/`                       | GET    | View wallet balance                      |
+| `/api/v1/wallet/top-up/initiate/`               | POST   | Initiate a top-up transaction            |
+| `/api/v1/wallet/top-up/confirm/`                | POST   | Confirm top-up within 10 minutes, else it will be marked ass expired automatically         |
+| `/api/v1/wallet/transaction/?reference=<ref>`   | GET    | Get transaction by reference ID (provided at the time of initiating a top-up request)             |
+| `/api/v1/wallet/transaction/all/`               | GET    | Get all transactions for the user logged in          |
 
-> ⚠️ All wallet routes require a valid **access token**.
+>  All wallet routes require a valid **access token**.
 
 ---
 
-## 📘 API Documentation (Swagger/OpenAPI)
+##  API Documentation (Swagger/OpenAPI)
 
 Swagger UI is available at:
 
@@ -86,8 +88,9 @@ Swagger UI is available at:
 http://localhost:8000/swagger/
 ```
 
+---
 
-## 🧪 Run Unit Tests
+##  Run Unit Tests
 
 ```bash
 python manage.py test
@@ -97,22 +100,21 @@ Covers:
 - Registration & Login
 - JWT handling
 - Wallet balance
-- Top-up logic
-- Transaction integrity
+- Top-up flow with expiration
+- Transaction history & fetching details
 
 ---
 
-## 🔐 Security Highlights
+##  Security Highlights
 
-- JWT (Access + Refresh)
+- JWT (Access + Refresh + Rotation)
 - Rate limiting (login, registration)
-- Password hashing
-- Safe financial transactions (`@atomic`)
-- Token blacklisting & rotation (optional)
+- Password hashing to secure the passwords from decrypting
+- Token refresh handling with token blacklisting
 
 ---
 
-## 📦 Technologies Used
+##  Technologies Used
 
 - Django 5
 - Django REST Framework
@@ -120,3 +122,9 @@ Covers:
 - SimpleJWT (for authentication)
 - django-ratelimit (for brute force protection)
 - drf-yasg (for Swagger/OpenAPI docs)
+
+---
+
+## - Notes
+
+This project is part of a backend interview assignment. It demonstrates secure authentication, user session management, and transaction-safe wallet operations with automatic transaction expiration logic.
