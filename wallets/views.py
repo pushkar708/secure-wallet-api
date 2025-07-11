@@ -1,4 +1,5 @@
-from datetime import timedelta, timezone
+from datetime import timedelta
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
