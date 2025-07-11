@@ -14,10 +14,8 @@ User = get_user_model()
 
 class RegisterUser(APIView):
     
-    @method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True))
-    def get(self, request):
-        return Response({"message": "User registration page"}, status=status.HTTP_200_OK)
 
+    @method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True))
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -52,10 +50,6 @@ class LoginUser(APIView):
             }, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def get(self, request):
-        return Response({"message": "User login page"}, status=status.HTTP_200_OK)
-
 
 class AuthUser(APIView):
     permission_classes = [IsAuthenticated]
